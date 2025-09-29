@@ -1,0 +1,133 @@
+doctype html
+html
+  head
+    title QA Testing Data and Groq Response
+    // Include Materialize CSS from CDN
+    link(href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css", rel="stylesheet")
+    style.
+      /* Custom styles for table and content wrapping */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        word-wrap: break-word; /* Break long words */
+        white-space: pre-wrap; /* Wrap text while preserving whitespace */
+      }
+      .card-content {
+        word-wrap: break-word;
+        white-space: pre-wrap;
+      }
+      .loading-spinner {
+        display: none;
+        text-align: center;
+      }
+      .loading-spinner img {
+        width: 50px;
+        height: 50px;
+      }
+      .results-section {
+        display: none; /* Initially hide results section */
+      }
+  body
+    .container
+      h1.center-align QA Thesis Binus
+
+      // Input Form Section
+      .section
+        h2.center-align Input URL to Scrape
+        form(action="/scrape-url" method="POST" id="scrapeForm")
+          .input-field
+            input#url(type="text" name="url" required)
+            label(for="url") Enter the URL to scrape
+          .center-align
+            button.btn.waves-effect.waves-light(type="submit") Submit
+
+        // Loading Spinner
+        .loading-spinner
+          img(src="https://i.gifer.com/ZZ5H.gif", alt="Loading...")
+
+        // Message Display Section
+        .message
+          h5#statusMessage.center-align.red-text
+
+      // Results Section (Hidden by default)
+      .results-section
+        // QA Testing Data Section
+        h2.center-align GROQ llama-3.3-70b-versatile
+        table.striped
+          thead
+            tr
+              th Category
+              th Value
+          tbody
+            each row in data
+              tr
+                td= row.Category
+                td= row.Value
+
+        // Groq Response Section
+        if message
+          .section
+            h2.center-align Groq Test Case Suggestions
+            .card
+              .card-content
+                pre= message
+
+    // Include Materialize JS and jQuery (required by Materialize)
+    script(src="https://code.jquery.com/jquery-3.6.0.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js")
+    script.
+      $(document).ready(function(){
+        M.AutoInit(); // Automatically initializes Materialize components
+
+        // Handle form submission
+        $('#scrapeForm').on('submit', function(event) {
+          event.preventDefault();
+          const url = $('#url').val();
+          const $statusMessage = $('#statusMessage');
+          const $spinner = $('.loading-spinner');
+          const $resultsSection = $('.results-section');
+
+          // Show loading spinner, hide results section, and reset messages
+          $spinner.show();
+          $statusMessage.text('');
+          $resultsSection.hide();
+
+          // Make AJAX POST request to scrape the URL
+          $.ajax({
+            url: '/scrape-url',
+            method: 'POST',
+            data: { url },
+            success: function(response) {
+              // Hide loading spinner and show success message
+              $spinner.hide();
+              $statusMessage.text('Successfully scraped the URL!').removeClass('red-text').addClass('green-text');
+
+              // Populate and show the results section
+              if (response.data && response.message) {
+                const $tableBody = $('table tbody');
+                $tableBody.empty(); // Clear any existing rows
+                response.data.forEach(row => {
+                  $tableBody.append(`<tr><td>${row.Category}</td><td>${row.Value}</td></tr>`);
+                });
+
+                $('.card-content pre').text(response.message); // Update Groq response
+                $resultsSection.show(); // Show the results section
+              }
+            },
+            error: function(xhr) {
+              // Hide loading spinner and show error message
+              $spinner.hide();
+              if (xhr.status === 404) {
+                $statusMessage.text('Error: URL not found!').removeClass('green-text').addClass('red-text');
+              } else {
+                $statusMessage.text('Error: Unable to scrape the URL!').removeClass('green-text').addClass('red-text');
+              }
+            }
+          });
+        });
+      });

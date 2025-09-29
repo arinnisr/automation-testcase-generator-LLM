@@ -1,0 +1,27 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Thesis BINUS 2025
+    link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css")
+    script(src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js")
+    script.
+      function showLoading() {
+        document.getElementById("loading").classList.remove("d-none");
+      }
+  body
+    .container.mt-5
+      h1.text-center Input URL
+      form(action="/scrape-url" method="POST" enctype="multipart/form-data" onsubmit="showLoading()")
+        .mb-3
+          label.form-label(for="url") URL
+          input#url.form-control(type="text" name="url" placeholder="Input the URL and generate your own testcase!")
+        .mb-3
+          label.form-label(for="file") Upload File
+          input#file.form-control(type="file" name="file")
+        .text-center
+          button.btn.btn-primary(type="submit") Submit
+      .text-center.mt-3#loading.d-none
+        div.spinner-border.text-primary(role="status")
+          span.visually-hidden Loading...
